@@ -1,4 +1,4 @@
-from .Skyblock import Skyblock
+from .Player import Player
 from .skills import Fishing, Dungeons
 
-__all__ = ["Skyblock", "Fishing", "Dungeons"]
+__all__ = ["Player", "Fishing", "Dungeons"]

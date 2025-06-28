@@ -1,12 +1,8 @@
+import requests
+
 from json import dumps
 from sqlite3 import connect
-from typing import Any, Dict, List
-from base64 import b64decode
-from gzip import decompress
-from nbtlib import File, serialize_tag
-from io import BytesIO
-
-import requests
+from typing import Any, Dict, List, Union
 
 
 def minecraft_uuid(playername: str):
@@ -75,17 +71,3 @@ def get_skill_emote(skill_name):
 
 def json_readable(data: Dict[str, Any] | List[Any], indent: int = 3) -> str:
     return dumps(data, indent=indent)
-
-
-def nbt_to_json(nbt_data: str):
-    # 2. Base64 → raw bytes → GZIP-decompress → raw NBT bytes
-    decoded = b64decode(nbt_data)
-    decompressed = decompress(decoded)
-
-    # 3. Parse raw NBT bytes into an nbtlib.File object
-    nbt_file = File.parse(BytesIO(decompressed))
-
-    # === OPTION B: Convert to a native Python dict and dump as pretty JSON ===
-    native_dict = serialize_tag(nbt_file)
-
-    return native_dict

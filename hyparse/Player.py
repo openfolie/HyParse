@@ -2,10 +2,14 @@ import requests
 from typing import Any, Dict, Optional, Literal, Tuple
 from logging import getLogger
 from json import dumps
+from numerize.numerize import numerize
+
 
 from .utils import minecraft_uuid
 from .exceptions import HypixelSuccessError, ExpiredAPIKey
 from .levels import getSkillLevel
+from .skills import Dungeons, Fishing
+from .player import Inventory
 
 logger = getLogger(__name__)
 
@@ -34,7 +38,7 @@ SelectedProfile = Literal[
 ]
 
 
-class Skyblock:
+class Player:
     _base_url = "https://api.hypixel.net/v2/skyblock"
 
     def __init__(
@@ -119,7 +123,8 @@ class Skyblock:
 
         raise ValueError("No matching profile found.")
 
-    def get_skill_info(self) -> Dict[str, Dict[str, int | float]]:
+    @property
+    def skill_levels(self) -> Dict[str, Dict[str, int | float]]:
         """Converts raw exp into skyblock level"""
 
         player_experience: Dict[str, int] = self._data["player_data"]["experience"]
@@ -134,3 +139,23 @@ class Skyblock:
     @property
     def skyblock_data(self) -> Dict[str, Any]:
         return self._data
+
+    @property
+    def dungeons(self) -> Dungeons:
+        return Dungeons(self._data)
+
+    @property
+    def fishing(self) -> Fishing:
+        return Fishing(self._data)
+
+    def inventory(self, *, lazy_load: bool = True) -> Inventory:
+        return Inventory(self._data, lazy_load)
+
+    def purse(self, human_readable: bool = True) -> float | str:
+        banking: Dict[str, Any] = self.profiles[self.profile_index]["banking"]
+        balance: float = banking.get("balance", 0)
+
+        if not human_readable:
+            return balance
+
+        return numerize(balance)
