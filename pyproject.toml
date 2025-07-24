@@ -25,5 +25,5 @@ dev = ["pytest", "black", "ruff"]
 requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-include = ["hyparse"]
+[tool.setuptools]
+packages = ["hyparse"]
