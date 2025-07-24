@@ -1,14 +1,8 @@
-import operator
-from typing import Any, Dict, List, Union
-from base64 import b64decode
-from gzip import decompress
+from typing import Any, Dict
 from json import dumps
-from nbtlib import File
-from io import BytesIO
 from concurrent.futures import ProcessPoolExecutor
-from functools import reduce
 
-JsonType = Union[Dict[str, Any], List[Any], str, int, float, bool, None]
+from .NBT import JsonType, _nbt_to_json, _get_nested
 
 
 class Inventory:
@@ -51,6 +45,7 @@ class Inventory:
     def __eq__(self, other) -> bool:
         if not isinstance(other, Inventory):
             return NotImplemented
+
         # force-evaluate both sides
         self.load_all()
         other.load_all()
@@ -64,33 +59,6 @@ class Inventory:
 
     def items(self):
         return ((k, self[k]) for k in self.inventory.keys())
-
-    @staticmethod
-    def _convert_nbt_tag(tag: Any) -> JsonType:
-        if isinstance(tag, dict):
-            return {k: Inventory._convert_nbt_tag(v) for k, v in tag.items()}
-        if isinstance(tag, list):
-            return [Inventory._convert_nbt_tag(v) for v in tag]
-        if hasattr(tag, "value"):
-            return Inventory._convert_nbt_tag(tag.value)
-        return tag
-
-    @staticmethod
-    def _nbt_to_json(nbt_data: str) -> Dict[str, Any]:
-        if not nbt_data:
-            return {}
-        decoded = b64decode(nbt_data)
-        decompressed = decompress(decoded)
-        nbt_file = File.parse(BytesIO(decompressed))
-        return Inventory._convert_nbt_tag(nbt_file)
-
-    @staticmethod
-    def _get_nested(d: Dict, path: List[str], default=None):
-        """Safely do d[path[0]][path[1]]…"""
-        try:
-            return reduce(operator.getitem, path, d)
-        except (KeyError, TypeError):
-            return default
 
     def _batch_parse_nbt(self) -> Dict[str, Any]:
         # build a list of all the dotted keys we want
@@ -116,7 +84,7 @@ class Inventory:
         # gather (key → base64‑blob)
         tasks: Dict[str, str] = {}
         for path in static_paths:
-            blob = self._get_nested(self.inventory, path + ["data"], "")
+            blob = _get_nested(self.inventory, path + ["data"], "")
             key = "/".join(path)
             if isinstance(blob, str) and blob:
                 tasks[key] = blob
@@ -126,7 +94,7 @@ class Inventory:
         # parallel decode
         if tasks:
             with ProcessPoolExecutor() as exe:
-                results = exe.map(Inventory._nbt_to_json, tasks.values())
+                results = exe.map(_nbt_to_json, tasks.values())
                 for key, res in zip(tasks, results):
                     self._parsed_nbt[key] = res
 
@@ -138,13 +106,9 @@ class Inventory:
         """
         key = "/".join(path)
         if key not in self._parsed_nbt:
-            blob = self._get_nested(self.inventory, list(path) + ["data"], "")
-            self._parsed_nbt[key] = Inventory._nbt_to_json(blob)
+            blob = _get_nested(self.inventory, list(path) + ["data"], "")
+            self._parsed_nbt[key] = _nbt_to_json(blob)
         return self._parsed_nbt[key]
-
-    def get_parsed(self, *path: str) -> JsonType:
-        """Alias if you want a name other than _get_nbt_json."""
-        return self._get_nbt_json(*path)
 
     # ──────────────────────────────── @property functions ────────────────────────────────
     @property
@@ -185,7 +149,8 @@ class Inventory:
             out[idx] = self._get_nbt_json("backpack_contents", idx).get("i")
         return out
 
-    def wardrbe(self):
+    @property
+    def wardrobe(self):
         return self._get_nbt_json("wardrobe_contents")
 
     def load_all(self) -> Dict[str, Any]:

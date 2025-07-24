@@ -1,0 +1,29 @@
+[project]
+name = "hyparse"
+version = "0.1.0"
+description = "A high-performance Hypixel/Minecraft data parser"
+authors = [{ name = "Saksham Jain", email = "jain.2007.saksham@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.13"
+license = "MIT"
+
+dependencies = [
+    "certifi==2025.6.15",
+    "charset-normalizer==3.4.2",
+    "idna==3.10",
+    "nbtlib==2.0.4",
+    "numerize==0.12",
+    "numpy==2.3.1",
+    "requests==2.32.4",
+    "urllib3==2.5.0"
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "black", "ruff"]
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["hyparse"]

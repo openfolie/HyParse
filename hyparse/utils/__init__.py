@@ -1,3 +1,3 @@
-from .utils import minecraft_uuid, json_readable
+from .utils import json_readable
 
-__all__ = ["minecraft_uuid", "json_readable"]
+__all__ = ["json_readable"]

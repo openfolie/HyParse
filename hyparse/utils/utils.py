@@ -1,16 +1,6 @@
-import requests
-
 from json import dumps
 from sqlite3 import connect
-from typing import Any, Dict, List, Union
-
-
-def minecraft_uuid(playername: str):
-    return (
-        requests.get(
-            "https://api.mojang.com/users/profiles/minecraft/" + playername
-        ).json()
-    )["id"]
+from typing import Any, Dict, List
 
 
 def connect_linkdb():

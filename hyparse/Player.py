@@ -4,9 +4,7 @@ from logging import getLogger
 from json import dumps
 from numerize.numerize import numerize
 
-
-from .utils import minecraft_uuid
-from .exceptions import HypixelSuccessError, ExpiredAPIKey
+from .exceptions import HypixelSuccessError, ExpiredAPIKey, UserNotFound
 from .levels import getSkillLevel
 from .skills import Dungeons, Fishing
 from .player import Inventory
@@ -73,6 +71,9 @@ class Player:
     def __contains__(self, key):
         return key in self._data
 
+    def __iter__(self):
+        return iter(self._data.keys())
+
     def _resolve_uuid(self, player_name: Optional[str], uuid: Optional[str]) -> str:
         """Ensure exactly one of player_name or uuid is provided, and return a resolved uuid."""
         if (player_name is None) == (uuid is None):  # XOR check
@@ -81,7 +82,7 @@ class Player:
             )
 
         if player_name:
-            return minecraft_uuid(player_name)
+            return self._minecraft_uuid(player_name)
 
         if uuid is None:
             raise ValueError("Incorrect Player name provided")
@@ -123,11 +124,28 @@ class Player:
 
         raise ValueError("No matching profile found.")
 
+    def _minecraft_uuid(self, playername: str):
+        response = requests.get(
+            "https://api.mojang.com/users/profiles/minecraft/" + playername
+        )
+
+        if response.status_code == 200:
+            return response.json().get("id")
+
+        else:
+            raise UserNotFound("Minecraft user was not found")
+
     @property
     def skill_levels(self) -> Dict[str, Dict[str, int | float]]:
         """Converts raw exp into skyblock level"""
 
-        player_experience: Dict[str, int] = self._data["player_data"]["experience"]
+        player_experience: Dict[str, int] = self._data["player_data"]
+        experiences = player_experience.get("experience")
+
+        # User doesn't have any skill unlocked
+        if experiences is None:
+            return {}
+
         skill_levels = {}
 
         for skill_name, skill_exp in player_experience.items():

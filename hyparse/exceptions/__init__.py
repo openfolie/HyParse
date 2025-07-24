@@ -3,6 +3,13 @@ from .exceptions import (
     HypixelSuccessError,
     ExpiredAPIKey,
     MissingAPIKey,
+    UserNotFound,
 )
 
-__all__ = ["HypixelAPIError", "HypixelSuccessError", "ExpiredAPIKey", "MissingAPIKey"]
+__all__ = [
+    "HypixelAPIError",
+    "HypixelSuccessError",
+    "ExpiredAPIKey",
+    "MissingAPIKey",
+    "UserNotFound",
+]

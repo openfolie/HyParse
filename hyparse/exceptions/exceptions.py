@@ -12,3 +12,7 @@ class ExpiredAPIKey(Exception):
 
 class MissingAPIKey(Exception):
     pass
+
+
+class UserNotFound(Exception):
+    pass
