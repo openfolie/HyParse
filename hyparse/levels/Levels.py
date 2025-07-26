@@ -1,36 +1,49 @@
-from ctypes import c_int, c_double, Structure, CDLL, c_char_p, create_string_buffer
+import json
 from os import path
+from typing import TypedDict
 
-SHARED_FILE_PATH = path.join(path.dirname(__file__), "levels.so")
+
 JSON_PATH = path.abspath(path.join(path.dirname(__file__), "json", "levels.json"))
 
 
-class SkillInfo(Structure):
-    _fields_ = [
-        ("skill_level", c_int),
-        ("remaining_xp", c_double),
-        ("xp_required_to_level_up", c_double),
-    ]
+class SkillInfo(TypedDict):
+    skill_level: int
+    remaining_xp: float
+    xp_required_to_level_up: float
 
 
-class SharedLibProtocol:
-    pass
+def getSkillLevel(
+    initial_exp: float,
+    is_catacombs: bool = True,
+) -> SkillInfo:
+    with open(JSON_PATH, "r") as f:
+        data = json.load(f)
 
+    skill_type = "Catacombs" if is_catacombs else "Skill"
+    skill_data = data[skill_type]
 
-lib = CDLL(SHARED_FILE_PATH)
-lib.getSkillInfo.argtypes = [c_double, c_char_p, c_char_p]
-lib.getSkillInfo.restype = SkillInfo
+    # Convert string keys to int and sort
+    cumulative_xp = {}
+    xp_required = {}
+    for level_str, (xp_req, total_xp) in skill_data.items():
+        level = int(level_str)
+        xp_required[level] = xp_req
+        cumulative_xp[level] = total_xp
 
+    # Determine skill level
+    skill_level = 0
+    for level in sorted(cumulative_xp):
+        if initial_exp < cumulative_xp[level]:
+            skill_level = level - 1
+            break
+    else:
+        skill_level = max(cumulative_xp)
 
-def getSkillLevel(skill_xp, is_catacombs=False):
-    skill_type = "Catacombs" if is_catacombs else "Skills"
-    skill_buffer = create_string_buffer(skill_type.encode("utf-8"), 15)
-    path_buffer = create_string_buffer(JSON_PATH.encode("utf-8"), 256)
-
-    info = lib.getSkillInfo(skill_xp, skill_buffer, path_buffer)
+    remaining_xp = initial_exp - cumulative_xp.get(skill_level, 0)
+    xp_to_next = xp_required.get(skill_level + 1, 0)
 
     return {
-        "level": info.skill_level,
-        "leftover_xp": round(info.remaining_xp, 2),
-        "xp_required_to_level_up": round(info.xp_required_to_level_up, 2),
+        "skill_level": skill_level,
+        "remaining_xp": remaining_xp,
+        "xp_required_to_level_up": xp_to_next,
     }

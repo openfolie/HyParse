@@ -4,6 +4,7 @@ from hyparse.exceptions import ExpiredAPIKey, UserNotFound
 
 from unittest.mock import patch, MagicMock
 from json import load
+from os import path
 
 
 API_KEY = "ABCDEFG"
@@ -13,7 +14,8 @@ PLAYER_NAME = "TheFieryWarrior"
 # Mock responses
 MOCK_UUID_RESPONSE = {"id": UUID}
 
-with open("test.json") as file:
+TEST_JSON = path.join(path.dirname(__file__), "test.json")
+with open(TEST_JSON) as file:
     MOCK_PROFILE_DATA = load(file)
 
 
