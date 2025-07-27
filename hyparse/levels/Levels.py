@@ -14,12 +14,12 @@ class SkillInfo(TypedDict):
 
 def getSkillLevel(
     initial_exp: float,
-    is_catacombs: bool = True,
+    is_catacombs: bool = False,
 ) -> SkillInfo:
     with open(JSON_PATH, "r") as f:
         data = json.load(f)
 
-    skill_type = "Catacombs" if is_catacombs else "Skill"
+    skill_type = "Catacombs" if is_catacombs else "Skills"
     skill_data = data[skill_type]
 
     # Convert string keys to int and sort

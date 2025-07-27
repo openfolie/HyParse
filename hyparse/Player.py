@@ -68,7 +68,7 @@ class Player:
     def __setitem__(self, key, value):
         self._data[key] = value
 
-    def __contains__(self, key):
+    def __contains__(self, key: str | int):
         return key in self._data
 
     def __iter__(self):
@@ -136,11 +136,20 @@ class Player:
             raise UserNotFound("Minecraft user was not found")
 
     @property
+    def cute_name(self) -> str:
+        if self.selected_profile:
+            return self.selected_profile
+
+        # Not using .get() as cute_name is formed as soon as player first joins Skyblock
+        cute_name = self.profiles[self.profile_index]["cute_name"]
+        return cute_name
+
+    @property
     def skill_levels(self) -> Dict[str, Dict[str, int | float]]:
         """Converts raw exp into skyblock level"""
 
-        player_experience: Dict[str, int] = self._data["player_data"]
-        experiences = player_experience.get("experience")
+        player_experience: Dict[str, Dict[str, int | float]] = self._data["player_data"]
+        experiences: Dict[str, int | float] | None = player_experience.get("experience")
 
         # User doesn't have any skill unlocked
         if experiences is None:
@@ -148,8 +157,8 @@ class Player:
 
         skill_levels = {}
 
-        for skill_name, skill_exp in player_experience.items():
-            skill_level = getSkillLevel(skill_xp=skill_exp)
+        for skill_name, skill_exp in experiences.items():
+            skill_level = getSkillLevel(initial_exp=skill_exp)
             skill_levels[skill_name] = skill_level
 
         return skill_levels
@@ -170,7 +179,13 @@ class Player:
         return Inventory(self._data, lazy_load)
 
     def purse(self, human_readable: bool = True) -> float | str:
-        banking: Dict[str, Any] = self.profiles[self.profile_index]["banking"]
+        banking: Optional[Dict[str, Any]] = self.profiles[self.profile_index].get(
+            "banking"
+        )
+
+        if banking is None:
+            return 0.0 if not human_readable else ""
+
         balance: float = banking.get("balance", 0)
 
         if not human_readable:

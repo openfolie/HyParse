@@ -1,0 +1,39 @@
+{
+  "success": true,
+  "profiles": [
+    {
+      "profile_id": "abcdef12345",
+      "members": {
+        "0959dfbde98d4b348271ad0c5728f4fe": {
+          "player_data": {
+            "experience": {
+              "SKILL_FISHING": 11146645.861739952,
+              "SKILL_ALCHEMY": 58479763.5,
+              "SKILL_RUNECRAFTING": 348.728,
+              "SKILL_MINING": 72029574.31631832,
+              "SKILL_FARMING": 166307438.3035786,
+              "SKILL_ENCHANTING": 87473126.45905294,
+              "SKILL_TAMING": 166692020.61319762,
+              "SKILL_FORAGING": 4153817.210493856,
+              "SKILL_SOCIAL": 1383.07,
+              "SKILL_CARPENTRY": 12915451.623127414,
+              "SKILL_COMBAT": 83769237.26458585
+            }
+          }
+        }
+      },
+      "cute_name": "Zucchini",
+      "selected": false
+    },
+    {
+      "profile_id": "i_hate_unit_testing",
+      "members": {
+        "0959dfbde98d4b348271ad0c5728f4fe": {
+          "player_data": {}
+        }
+      },
+      "cute_name": "Tomato",
+      "selected": true
+    }
+  ]
+}

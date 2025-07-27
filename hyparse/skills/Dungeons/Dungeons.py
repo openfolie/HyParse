@@ -1,8 +1,7 @@
 from typing import Any, Dict
 
-from ...levels import getSkillLevel
+from hyparse.levels import getSkillLevel
 from .Catacombs import Catacombs
-from .Master_Catacombs import Master_Catacombs
 
 
 class Dungeons:
@@ -19,8 +18,8 @@ class Dungeons:
         return Catacombs(self.dungeon_types.get("catacombs", {}))
 
     @property
-    def master_catacombs(self) -> Master_Catacombs:
-        return Master_Catacombs(self.dungeon_types.get("master_catacombs", {}))
+    def master_catacombs(self) -> Catacombs:
+        return Catacombs(self.dungeon_types.get("master_catacombs", {}))
 
     @property
     def cata_level(self):
