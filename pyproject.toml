@@ -25,6 +25,12 @@ dev = ["pytest", "pytest-mock", "black", "ruff"]
 requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"hyparse.levels.json" = ["*.json"]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["hyparse*"]
